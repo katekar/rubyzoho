@@ -36,11 +36,13 @@ module ZohoApi
       x = REXML::Document.new
       element = x.add_element module_name
       row = element.add_element 'row', {'no' => '1'}
+      larid = fields_values_hash.delete(:larid)
       fields_values_hash.each_pair { |k, v| add_field(row, k, v, module_name) }
       r = self.class.post(create_url(module_name, 'insertRecords'),
-                          :query => {:newFormat => 1, :authtoken => @auth_token,
-                                     :scope => 'crmapi', :xmlData => x, :wfTrigger => 'true'},
-                          :headers => {'Content-length' => '0'})
+                          query: { newFormat: 1, authtoken: @auth_token,
+                                   scope: 'crmapi', xmlData: x, wfTrigger: 'true',
+                                   larid: larid },
+                          headers: {'Content-length' => '0'})
       check_for_errors(r)
       x_r = REXML::Document.new(r.body).elements.to_a('//recorddetail')
       to_hash(x_r, module_name)[0]
